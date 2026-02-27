@@ -1,0 +1,104 @@
+<!-- 七轴机械臂 + 夹爪 Pick & Place 场景 -->
+<mujoco model="arm7_pick_place">
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <default>
+    <joint type="hinge" damping="1" armature="0.01"/>
+    <geom friction="1 0.5 0.5" rgba="0.6 0.6 0.7 1"/>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.4 0.5 0.6" rgb2="0.1 0.1 0.2" width="512" height="512"/>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.2 0.2 0.25" rgb2="0.3 0.3 0.35"/>
+    <material name="grid" texture="grid" texrepeat="2 2" reflectance="0.1"/>
+    <material name="object" rgba="0.9 0.6 0.2 1"/>
+    <material name="place_zone" rgba="0.2 0.7 0.3 0.4"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" diffuse="1 1 1"/>
+    <geom name="floor" type="plane" size="1 1 0.1" material="grid"/>
+
+    <!-- 取物桌 -->
+    <body name="table_pick" pos="0.45 0 0.25">
+      <geom name="table_surface" type="box" size="0.2 0.15 0.02" rgba="0.4 0.35 0.3 1"/>
+      <geom name="table_leg1" type="box" pos="-0.15 -0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
+      <geom name="table_leg2" type="box" pos="0.15 -0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
+      <geom name="table_leg3" type="box" pos="-0.15 0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
+      <geom name="table_leg4" type="box" pos="0.15 0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
+    </body>
+
+    <!-- 放物区（目标区域） -->
+    <body name="table_place" pos="0.45 -0.35 0.25">
+      <geom name="place_surface" type="box" size="0.15 0.12 0.02" material="place_zone"/>
+      <geom name="place_leg1" type="box" pos="-0.1 -0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
+      <geom name="place_leg2" type="box" pos="0.1 -0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
+      <geom name="place_leg3" type="box" pos="-0.1 0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
+      <geom name="place_leg4" type="box" pos="0.1 0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
+    </body>
+
+    <!-- 待抓取物体（自由关节，可被夹爪带动） -->
+    <body name="object" pos="0.45 0 0.32">
+      <freejoint name="object_joint"/>
+      <geom name="box_to_pick" type="box" size="0.03 0.03 0.03" material="object" mass="0.05"/>
+    </body>
+
+    <!-- 七轴机械臂：base -> L1..L6 -> 末端 -> 夹爪 -->
+    <body name="base_link" pos="0 0 0.1">
+      <geom name="base_geom" type="cylinder" size="0.08 0.02" rgba="0.25 0.25 0.3 1"/>
+      <joint name="j1" type="hinge" axis="0 0 1" range="-180 180"/>
+      <body name="link1" pos="0 0 0.05">
+        <geom name="L1" type="capsule" fromto="0 0 0 0 0 0.12" size="0.04" rgba="0.5 0.2 0.2 1"/>
+        <joint name="j2" type="hinge" axis="0 1 0" pos="0 0 0.12" range="-90 90"/>
+        <body name="link2" pos="0 0 0.12">
+          <geom name="L2" type="capsule" fromto="0 0 0 0.12 0 0" size="0.035" rgba="0.2 0.5 0.2 1"/>
+          <joint name="j3" type="hinge" axis="0 1 0" pos="0.12 0 0" range="-90 90"/>
+          <body name="link3" pos="0.12 0 0">
+            <geom name="L3" type="capsule" fromto="0 0 0 0.1 0 0" size="0.03" rgba="0.2 0.2 0.5 1"/>
+            <joint name="j4" type="hinge" axis="1 0 0" pos="0.1 0 0" range="-180 180"/>
+            <body name="link4" pos="0.1 0 0">
+              <geom name="L4" type="capsule" fromto="0 0 0 0 0 0.06" size="0.025" rgba="0.5 0.5 0.2 1"/>
+              <joint name="j5" type="hinge" axis="0 1 0" pos="0 0 0.06" range="-90 90"/>
+              <body name="link5" pos="0 0 0.06">
+                <geom name="L5" type="capsule" fromto="0 0 0 0 0 0.05" size="0.02" rgba="0.5 0.2 0.5 1"/>
+                <joint name="j6" type="hinge" axis="1 0 0" pos="0 0 0.05" range="-180 180"/>
+                <body name="link6" pos="0 0 0.05">
+                  <geom name="L6" type="capsule" fromto="0 0 0 0 0 0.04" size="0.018" rgba="0.2 0.5 0.5 1"/>
+                  <joint name="j7" type="hinge" axis="0 1 0" pos="0 0 0.04" range="-90 90"/>
+                  <body name="ee_link" pos="0 0 0.04">
+                    <geom name="ee_geom" type="cylinder" size="0.02 0.02" rgba="0.3 0.3 0.3 1"/>
+                    <!-- 夹爪：左右两指，用 slide 关节 -->
+                    <body name="finger_left" pos="0 -0.03 0.06">
+                      <joint name="gripper_left" type="slide" axis="0 1 0" range="-0.04 0" damping="0.5"/>
+                      <geom name="finger_L" type="box" size="0.01 0.015 0.04" pos="0 0 0" rgba="0.4 0.4 0.4 1"/>
+                    </body>
+                    <body name="finger_right" pos="0 0.03 0.06">
+                      <joint name="gripper_right" type="slide" axis="0 -1 0" range="-0.04 0" damping="0.5"/>
+                      <geom name="finger_R" type="box" size="0.01 0.015 0.04" pos="0 0 0" rgba="0.4 0.4 0.4 1"/>
+                    </body>
+                    <site name="ee_site" pos="0 0 0.1" size="0.01"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <joint joint1="gripper_left" joint2="gripper_right" polycoef="0 1 0 0 0"/>
+  </equality>
+
+  <actuator>
+    <position name="act_j1" joint="j1" kp="80" kv="4" ctrlrange="-3.14 3.14"/>
+    <position name="act_j2" joint="j2" kp="80" kv="4" ctrlrange="-1.57 1.57"/>
+    <position name="act_j3" joint="j3" kp="80" kv="4" ctrlrange="-1.57 1.57"/>
+    <position name="act_j4" joint="j4" kp="60" kv="3" ctrlrange="-3.14 3.14"/>
+    <position name="act_j5" joint="j5" kp="60" kv="3" ctrlrange="-1.57 1.57"/>
+    <position name="act_j6" joint="j6" kp="60" kv="3" ctrlrange="-3.14 3.14"/>
+    <position name="act_j7" joint="j7" kp="60" kv="3" ctrlrange="-1.57 1.57"/>
+    <position name="act_gripper" joint="gripper_left" kp="200" kv="10" ctrlrange="-0.04 0"/>
+  </actuator>
+</mujoco>
