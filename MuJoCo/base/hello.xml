@@ -1,0 +1,89 @@
+<!-- 文档：https://zhuanlan.zhihu.com/p/696094248 -->
+<!-- MuJoCo 根元素：定义模型名为 "hello" -->
+<mujoco model="hello">
+    <!-- 资源区：材质、纹理等可复用资源 -->
+    <asset>
+        <!-- 绿色材质：RGBA(0,1,0,1) 即纯绿不透明 -->
+        <material name="green" rgba="0 1 0 1" />
+        <!-- 棋盘格纹理：2D 内置 checker，512x512，两色 rgb1/rgb2 -->
+        <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4" />
+        <!-- 使用上述纹理的材质：平铺 1x1，均匀缩放，反射率 0.2 -->
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2" />
+    </asset>
+
+    <!-- 默认值区：定义可复用的几何/关节等默认类 -->
+    <default>
+        <!-- 胶囊类 capsule1：半径 0.05、半长 0.4，欧拉角 0,0,0（竖直），绿色 -->
+        <default class="capsule1">
+            <geom type="capsule" size=".05 .4" euler="0 0 0" material="green" />
+        </default>
+        <!-- 胶囊类 capsule2：半径 0.05、半长 0.2，绕 Y 转 90°（水平），绿色 -->
+        <default class="capsule2">
+            <geom type="capsule" size=".05 .2" euler="0 90 0" material="green" />
+        </default>
+    </default>
+
+    <!-- 世界体：场景中的固定与可动物体 -->
+    <worldbody>
+        <!-- 环境光：漫反射 RGB，位置，方向 -->
+        <light diffuse="0.3 0.3 0.3" pos="1 0 3" dir="-1 0 -3" />
+        <!-- 地面：无限平面，尺寸 10x10x0.1，使用棋盘格材质 -->
+        <geom type="plane" size="10 10 0.1"  material="grid" />
+
+        <!-- 字母 H：位置 (0,0,1)，欧拉角 0 -->
+        <body name="H" pos="0 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <!-- 左竖 | -->
+            <geom class="capsule1" pos="0.0 0 0" />
+            <!-- 横杠 - -->
+            <geom class="capsule2" pos="0.2 0 0" />
+            <!-- 右竖 | -->
+            <geom class="capsule1" pos="0.4 0 0" />
+        </body>
+
+        <!-- 字母 E：位置 (0.6,0,1) -->
+        <body name="E" pos="0.6 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <!-- 左竖 | -->
+            <geom class="capsule1" pos="0 0 0" />
+            <!-- 上横 - -->
+            <geom class="capsule2" pos="0.2 0 0.4" />
+            <!-- 中横 - -->
+            <geom class="capsule2" pos="0.2 0 0" />
+            <!-- 下横 - -->
+            <geom class="capsule2" pos="0.2 0 -0.4" />
+        </body>
+
+        <!-- 字母 L（第一个）：位置 (1.2,0,1) -->
+        <body name="L1" pos="1.2 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <!-- 竖 | -->
+            <geom class="capsule1" pos="0 0 0" />
+            <!-- 下横 - -->
+            <geom class="capsule2" pos="0.2 0 -0.4" />
+        </body>
+
+        <!-- 字母 L（第二个）：位置 (1.8,0,1) -->
+        <body name="L2" pos="1.8 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <!-- 竖 | -->
+            <geom class="capsule1" pos="0 0 0" />
+            <!-- 下横 - -->
+            <geom class="capsule2" pos="0.2 0 -0.4" />
+        </body>
+
+        <!-- 字母 O：位置 (2.4,0,1)，由竖横竖横组成矩形框 -->
+        <body name="O" pos="2.4 0 1" euler="0 0 0">
+            <joint type="free"/>
+            <!-- 左竖 | -->
+            <geom class="capsule1" pos="0 0 0" />
+            <!-- 下横 - -->
+            <geom class="capsule2" pos="0.2 0 -0.4" />
+            <!-- 上横 - -->
+            <geom class="capsule2" pos="0.2 0 0.4" />
+            <!-- 右竖 | -->
+            <geom class="capsule1" pos="0.4 0 0" />
+        </body>
+
+    </worldbody>
+</mujoco>

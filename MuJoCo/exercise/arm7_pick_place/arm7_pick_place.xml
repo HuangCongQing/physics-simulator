@@ -1,12 +1,19 @@
-<!-- 七轴机械臂 + 夹爪 Pick & Place 场景 -->
+<!--
+  七轴机械臂 Pick & Place 场景
+  模型说明：七自由度机械臂 + 平行夹爪，完成从取物桌抓取物体并放到放物区的任务。
+-->
+
 <mujoco model="arm7_pick_place">
+  <!-- 仿真选项：时间步长 2ms，重力沿 -z -->
   <option timestep="0.002" gravity="0 0 -9.81"/>
 
+  <!-- 默认属性：关节阻尼与转动惯量、几何体摩擦与颜色 -->
   <default>
     <joint type="hinge" damping="1" armature="0.01"/>
     <geom friction="1 0.5 0.5" rgba="0.6 0.6 0.7 1"/>
   </default>
 
+  <!-- 资源：纹理与材质 -->
   <asset>
     <texture type="skybox" builtin="gradient" rgb1="0.4 0.5 0.6" rgb2="0.1 0.1 0.2" width="512" height="512"/>
     <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.2 0.2 0.25" rgb2="0.3 0.3 0.35"/>
@@ -16,10 +23,11 @@
   </asset>
 
   <worldbody>
+    <!-- 环境光与地面 -->
     <light pos="0 0 3" dir="0 0 -1" diffuse="1 1 1"/>
     <geom name="floor" type="plane" size="1 1 0.1" material="grid"/>
 
-    <!-- 取物桌 -->
+    <!-- 取物桌：桌面 + 四腿，物体从此处抓取 -->
     <body name="table_pick" pos="0.45 0 0.25">
       <geom name="table_surface" type="box" size="0.2 0.15 0.02" rgba="0.4 0.35 0.3 1"/>
       <geom name="table_leg1" type="box" pos="-0.15 -0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
@@ -28,7 +36,7 @@
       <geom name="table_leg4" type="box" pos="0.15 0.12 -0.1" size="0.02 0.02 0.08" rgba="0.3 0.3 0.3 1"/>
     </body>
 
-    <!-- 放物区（目标区域） -->
+    <!-- 放物区（目标区域）：物体被放置到此桌面 -->
     <body name="table_place" pos="0.45 -0.35 0.25">
       <geom name="place_surface" type="box" size="0.15 0.12 0.02" material="place_zone"/>
       <geom name="place_leg1" type="box" pos="-0.1 -0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
@@ -37,45 +45,54 @@
       <geom name="place_leg4" type="box" pos="0.1 0.07 -0.08" size="0.02 0.02 0.06" rgba="0.3 0.3 0.3 1"/>
     </body>
 
-    <!-- 待抓取物体（自由关节，可被夹爪带动） -->
+    <!-- 待抓取物体：自由关节，可被夹爪接触带动，小方块 -->
     <body name="object" pos="0.45 0 0.32">
       <freejoint name="object_joint"/>
       <geom name="box_to_pick" type="box" size="0.03 0.03 0.03" material="object" mass="0.05"/>
     </body>
 
-    <!-- 七轴机械臂：base -> L1..L6 -> 末端 -> 夹爪 -->
+    <!-- ========== 七轴机械臂：base -> link1..link6 -> 末端 ee_link -> 夹爪 ========== -->
     <body name="base_link" pos="0 0 0.1">
       <geom name="base_geom" type="cylinder" size="0.08 0.02" rgba="0.25 0.25 0.3 1"/>
+      <!-- j1：基座旋转，绕 z 轴，±180° -->
       <joint name="j1" type="hinge" axis="0 0 1" range="-180 180"/>
       <body name="link1" pos="0 0 0.05">
         <geom name="L1" type="capsule" fromto="0 0 0 0 0 0.12" size="0.04" rgba="0.5 0.2 0.2 1"/>
+        <!-- j2：肩部，绕 y 轴，±90° -->
         <joint name="j2" type="hinge" axis="0 1 0" pos="0 0 0.12" range="-90 90"/>
         <body name="link2" pos="0 0 0.12">
           <geom name="L2" type="capsule" fromto="0 0 0 0.12 0 0" size="0.035" rgba="0.2 0.5 0.2 1"/>
+          <!-- j3：肘部，绕 y 轴，±90° -->
           <joint name="j3" type="hinge" axis="0 1 0" pos="0.12 0 0" range="-90 90"/>
           <body name="link3" pos="0.12 0 0">
             <geom name="L3" type="capsule" fromto="0 0 0 0.1 0 0" size="0.03" rgba="0.2 0.2 0.5 1"/>
+            <!-- j4：腕部 1，绕 x 轴，±180° -->
             <joint name="j4" type="hinge" axis="1 0 0" pos="0.1 0 0" range="-180 180"/>
             <body name="link4" pos="0.1 0 0">
               <geom name="L4" type="capsule" fromto="0 0 0 0 0 0.06" size="0.025" rgba="0.5 0.5 0.2 1"/>
+              <!-- j5：腕部 2，绕 y 轴，±90° -->
               <joint name="j5" type="hinge" axis="0 1 0" pos="0 0 0.06" range="-90 90"/>
               <body name="link5" pos="0 0 0.06">
                 <geom name="L5" type="capsule" fromto="0 0 0 0 0 0.05" size="0.02" rgba="0.5 0.2 0.5 1"/>
+                <!-- j6：腕部 3，绕 x 轴，±180° -->
                 <joint name="j6" type="hinge" axis="1 0 0" pos="0 0 0.05" range="-180 180"/>
                 <body name="link6" pos="0 0 0.05">
                   <geom name="L6" type="capsule" fromto="0 0 0 0 0 0.04" size="0.018" rgba="0.2 0.5 0.5 1"/>
+                  <!-- j7：末端俯仰，绕 y 轴，±90° -->
                   <joint name="j7" type="hinge" axis="0 1 0" pos="0 0 0.04" range="-90 90"/>
                   <body name="ee_link" pos="0 0 0.04">
                     <geom name="ee_geom" type="cylinder" size="0.02 0.02" rgba="0.3 0.3 0.3 1"/>
-                    <!-- 夹爪：左右两指，用 slide 关节 -->
+                    <!-- 夹爪左指：slide 关节，沿 y 向内收，范围 -0.04~0 -->
                     <body name="finger_left" pos="0 -0.03 0.06">
                       <joint name="gripper_left" type="slide" axis="0 1 0" range="-0.04 0" damping="0.5"/>
                       <geom name="finger_L" type="box" size="0.01 0.015 0.04" pos="0 0 0" rgba="0.4 0.4 0.4 1"/>
                     </body>
+                    <!-- 夹爪右指：与左指对称，由 equality 约束同步 -->
                     <body name="finger_right" pos="0 0.03 0.06">
                       <joint name="gripper_right" type="slide" axis="0 -1 0" range="-0.04 0" damping="0.5"/>
                       <geom name="finger_R" type="box" size="0.01 0.015 0.04" pos="0 0 0" rgba="0.4 0.4 0.4 1"/>
                     </body>
+                    <!-- 末端参考点，可用于 IK/笛卡尔控制 -->
                     <site name="ee_site" pos="0 0 0.1" size="0.01"/>
                   </body>
                 </body>
@@ -87,10 +104,12 @@
     </body>
   </worldbody>
 
+  <!-- 约束：夹爪左右指同步运动（关节值相等） -->
   <equality>
     <joint joint1="gripper_left" joint2="gripper_right" polycoef="0 1 0 0 0"/>
   </equality>
 
+  <!-- 驱动器：7 个臂关节位置伺服 + 1 个夹爪位置伺服，ctrl 顺序即 j1..j7, gripper_left -->
   <actuator>
     <position name="act_j1" joint="j1" kp="80" kv="4" ctrlrange="-3.14 3.14"/>
     <position name="act_j2" joint="j2" kp="80" kv="4" ctrlrange="-1.57 1.57"/>
