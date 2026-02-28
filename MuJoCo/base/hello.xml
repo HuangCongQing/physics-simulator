@@ -11,7 +11,7 @@
         <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance=".2" />
     </asset>
 
-    <!-- 默认值区：定义可复用的几何/关节等默认类 -->
+    <!-- 【公用区】默认值区：定义可复用的几何/关节等默认类 -->
     <default>
         <!-- 胶囊类 capsule1：半径 0.05、半长 0.4，欧拉角 0,0,0（竖直），绿色 -->
         <default class="capsule1">
